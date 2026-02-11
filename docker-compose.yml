@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: cris_assistant
+    restart: always
+    volumes:
+      - ./bot_data.db:/app/bot_data.db
+    env_file:
+      - .env
