@@ -1,5 +1,6 @@
 import os
 import logging
+import asyncio
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
@@ -72,14 +73,27 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if target_name == "BD Group" or (bd_id_env and str(target_chat_id) == bd_id_env):
         group_type = 'bd'
     else:
-        group_type = 'default'
+            group_type = 'default'
+
+    # Notify user we are syncing/processing
+    status_msg = await update.message.reply_text("🔄 Syncing latest messages...")
+    
+    # Simulate sync delay to ensure all pending updates are processed
+    # In reality, the bot receives updates in real-time, but this ensures the event loop has cycled
+    await asyncio.sleep(2) 
 
     messages = get_messages_today(target_chat_id)
+    
+    # Update status to generating
+    await context.bot.edit_message_text(chat_id=update.effective_chat.id, message_id=status_msg.message_id, text="📝 Generating report...")
+
     summary = await summarize_messages(messages, group_type)
     print(f"DEBUG: Summary generated. Length: {len(summary)}")
     print(f"DEBUG: Summary content prefix: {summary[:100]}...")
     
     try:
+        # Delete status message
+        await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=status_msg.message_id)
         await update.message.reply_text(f"📝 <b>Daily Summary Report ({target_name})</b>:\n\n{summary}", parse_mode='HTML')
     except Exception as e:
         print(f"ERROR: Failed to send HTML report: {e}")
