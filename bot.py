@@ -67,7 +67,13 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(f"DEBUG: Generating report for {target_name} ({target_chat_id})")
     
-    group_type = 'bd' if target_name == "BD Group" else 'default'
+    # Determine group type based on chat ID or explicit target name
+    bd_id_env = os.getenv("BD_CHAT_ID")
+    if target_name == "BD Group" or (bd_id_env and str(target_chat_id) == bd_id_env):
+        group_type = 'bd'
+    else:
+        group_type = 'default'
+
     messages = get_messages_today(target_chat_id)
     summary = await summarize_messages(messages, group_type)
     print(f"DEBUG: Summary generated. Length: {len(summary)}")
