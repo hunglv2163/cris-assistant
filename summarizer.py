@@ -20,7 +20,7 @@ async def summarize_messages(messages, group_type="default"):
 
     conversation_text = ""
     for username, content, timestamp in messages:
-        conversation_text += f"[{timestamp}] {username}: {content}\n"
+        conversation_text += f"USER: @{username}\nTIME: {timestamp}\nCONTENT:\n{content}\n----------------------------------------\n"
 
     print(f"DEBUG: Input text to OpenAI ({len(conversation_text)} chars):\n{conversation_text}...")
 
